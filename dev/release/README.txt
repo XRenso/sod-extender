@@ -7,12 +7,19 @@ INSTALL (once)
 3. Start the game from Steam. The FIRST start takes 1-2 minutes longer and needs the internet
    once: BepInEx downloads Unity libraries and builds wrappers for this game version.
    This repeats once after each game update.
-4. Subscribe to code mods on the Steam Workshop as usual. Turn them on in the game's Mods menu.
+4. Subscribe to the Workshop item "SOD Extender (core)":
+   https://steamcommunity.com/sharedfiles/filedetails/?id=3841436986
+   It keeps the extender up to date. You never need a new zip for an update.
+   Without it the extender still works, with the version from this zip.
+5. Subscribe to code mods on the Steam Workshop as usual. Turn them on in the game's Mods menu.
    The "SOD Extender" button on the Mods screen shows which mods loaded and which failed.
 
 SAFETY
 Code mods run with no sandbox and with your user rights, like any program. Install only mods
 you trust.
+
+USE ONLY THE VERSION FROM THIS ZIP
+In BepInEx/config/sod.extender.cfg set   UseWorkshop = false   (section [Core]).
 
 TURN OFF FOR ONE SESSION
 In the game folder, open doorstop_config.ini and set   enabled = false

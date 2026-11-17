@@ -46,6 +46,7 @@ ILSPY = ROOT / "dev" / "toolchain" / "ilspy" / "ilspycmd.exe"
 DECOMPILED = ROOT / "dev" / "reference" / "decompiled"
 BRIDGE_PROJECT = ROOT / "dev" / "SodDevBridge" / "SodDevBridge.csproj"
 EXTENDER_PROJECT = ROOT / "extender" / "SodExtender" / "SodExtender.csproj"
+LOADER_PROJECT = ROOT / "extender" / "SodExtender.Loader" / "SodExtender.Loader.csproj"
 LOCAL_MODS = GAME_DATA / "Mods"
 TESTS_DIR = ROOT / "dev" / "tests" / "ingame"
 OFFLINE_PROJECT = ROOT / "dev" / "tests" / "offline" / "SodOfflineTests.csproj"
@@ -199,7 +200,7 @@ def mod_projects() -> list[Path]:
 
 def resolve_projects(names: list[str]) -> list[Path]:
     # The extender goes before the mods, because mods compile against it.
-    projects = {p.stem: p for p in [BRIDGE_PROJECT, EXTENDER_PROJECT, *mod_projects()]}
+    projects = {p.stem: p for p in [BRIDGE_PROJECT, EXTENDER_PROJECT, LOADER_PROJECT, *mod_projects()]}
     if not names:
         return list(projects.values())
     missing = [n for n in names if n not in projects]
@@ -236,12 +237,34 @@ def deploy(project: Path) -> None:
         settings = root / "ModSettings.txt"
         if not settings.exists():  # The game owns this file after creation: it stores enabled and load order.
             settings.write_text(json.dumps(mod_settings(project.parent), indent=1), encoding="utf-8")
+    elif project == EXTENDER_PROJECT:
+        # The core is not a BepInEx plugin: the loader finds it in plugins/SodExtender/core (see core_json()).
+        target = PLUGINS / "SodExtender" / "core"
+        old_plugin = PLUGINS / "SodExtender" / "SodExtender.dll"  # pre-0.3 layout: the core WAS the plugin
+        for stale in (old_plugin, old_plugin.with_suffix(".pdb")):
+            if stale.exists():
+                stale.unlink()
+    elif project == LOADER_PROJECT:
+        target = PLUGINS / "SodExtender"
     else:
         target = PLUGINS / project.stem
     target.mkdir(parents=True, exist_ok=True)
     for name in (f"{project.stem}.dll", f"{project.stem}.pdb"):
         if (src / name).exists():
             shutil.copy2(src / name, target / name)
+    if project == EXTENDER_PROJECT:
+        (target / "core.json").write_text(core_json(), encoding="utf-8")
+
+
+def core_versions() -> tuple:
+    """(version, api) from the core's Plugin.cs: the single source of both."""
+    text = (EXTENDER_PROJECT.parent / "Plugin.cs").read_text(encoding="utf-8")
+    return (re.search(r'Version = "([^"]+)"', text).group(1), int(re.search(r"ApiMajor = (\d+);", text).group(1)))
+
+
+def core_json() -> str:
+    version, api = core_versions()
+    return json.dumps({"version": version, "api": api}) + "\n"
 
 
 def cmd_deploy(a) -> int:
@@ -862,9 +885,9 @@ def cmd_new_mod(a) -> int:
 def cmd_package_extender(a) -> int:
     """Create the player's install archive: unpack it into the game folder. Nothing is uploaded.
     It has no generated interop, so a new game version cannot get stale wrappers."""
-    if run_dotnet_build(EXTENDER_PROJECT) != 0:
+    if run_dotnet_build(EXTENDER_PROJECT) != 0 or run_dotnet_build(LOADER_PROJECT) != 0:
         return 1
-    version = re.search(r'Version = "([^"]+)"', (EXTENDER_PROJECT.parent / "Plugin.cs").read_text(encoding="utf-8")).group(1)
+    version = core_versions()[0]
     out = BUILD / "packages" / f"SodExtender-{version}.zip"
     out.parent.mkdir(parents=True, exist_ok=True)
     entries = [ROOT / n for n in ("winhttp.dll", "doorstop_config.ini", ".doorstop_version")]
@@ -878,8 +901,9 @@ def cmd_package_extender(a) -> int:
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         for path in entries:
             z.write(path, path.relative_to(ROOT))
-        dll = BUILD / "SodExtender" / "SodExtender.dll"
-        z.write(dll, f"BepInEx/plugins/SodExtender/{dll.name}")
+        z.write(BUILD / "SodExtender.Loader" / "SodExtender.Loader.dll", "BepInEx/plugins/SodExtender/SodExtender.Loader.dll")
+        z.write(BUILD / "SodExtender" / "SodExtender.dll", "BepInEx/plugins/SodExtender/core/SodExtender.dll")
+        z.writestr("BepInEx/plugins/SodExtender/core/core.json", core_json())
         z.write(ROOT / "LICENSE", "BepInEx/plugins/SodExtender/LICENSE.txt")
         z.write(ROOT / "dev" / "release" / "THIRD-PARTY-NOTICES.txt", "BepInEx/plugins/SodExtender/THIRD-PARTY-NOTICES.txt")
         z.write(ROOT / "dev" / "release" / "README.txt", "SodExtender-README.txt")
@@ -891,6 +915,24 @@ def cmd_package_extender(a) -> int:
         out.unlink()
         die(f"archive must not contain: {bad[:5]}")
     print(f"{out} ({out.stat().st_size / 1024 ** 2:.1f} MB, {len(names)} files)")
+    return 0
+
+
+def cmd_package_core(a) -> int:
+    """Create the Workshop item folder of the extender core (Core/, not Code/: mod discovery skips it). Nothing is uploaded."""
+    if run_dotnet_build(EXTENDER_PROJECT) != 0:
+        return 1
+    version, api = core_versions()
+    out = BUILD / "packages" / "SodExtenderCore"
+    shutil.rmtree(out, ignore_errors=True)
+    (out / "Core").mkdir(parents=True)
+    settings = {"name": "SOD Extender", "version": version, "loadOrderValue": 0, "creator": "XRenso",
+                "summary": "Core of SOD Extender. Needs the one-time SOD Extender install (see the item page).", "enabled": True}
+    (out / "ModSettings.txt").write_text(json.dumps(settings, indent=1), encoding="utf-8")
+    shutil.copy2(BUILD / "SodExtender" / "SodExtender.dll", out / "Core" / "SodExtender.dll")
+    (out / "Core" / "core.json").write_text(core_json(), encoding="utf-8")
+    shutil.copy2(ROOT / "LICENSE", out / "Core" / "LICENSE.txt")
+    print(f"{out} (core {version}, api {api})")
     return 0
 
 
@@ -916,6 +958,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(prog="sod.py", description=__doc__)
     sub = ap.add_subparsers(dest="command", required=True)
 
+    s = sub.add_parser("package-core", help="create the Workshop item folder of the extender core (no upload)")
+    s.set_defaults(fn=cmd_package_core)
     s = sub.add_parser("build", help="compile projects (the game may keep running)")
     s.add_argument("names", nargs="*"); s.set_defaults(fn=cmd_build)
     s = sub.add_parser("deploy", help="build and copy to BepInEx/plugins (game must be closed)")

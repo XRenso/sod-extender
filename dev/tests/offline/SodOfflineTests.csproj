@@ -17,6 +17,7 @@
     <Compile Include="*.cs;Fakes\**\*.cs" />
     <!-- Pure code under test, linked as source: the extender's Pure folder and each mod's src/Rules. -->
     <Compile Include="$(GameDir)extender\SodExtender\Pure\**\*.cs" Link="pure\extender\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(GameDir)extender\SodExtender.Loader\Pure\**\*.cs" Link="pure\loader\%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="$(GameDir)mods\*\src\Rules\**\*.cs" Link="pure\mods\%(RecursiveDir)%(Filename)%(Extension)" />
     <!-- Mod offline tests. mods/*/tests/*.cs (one level) stays the in-game suite. -->
     <Compile Include="$(GameDir)mods\*\tests\offline\**\*.cs" Link="modtests\%(RecursiveDir)%(Filename)%(Extension)" />

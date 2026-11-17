@@ -7,10 +7,14 @@ using UnityEngine;
 
 namespace SodExtender
 {
-    [BepInPlugin("sod.extender", "SOD Extender", Version)]
-    public class Plugin : BasePlugin
+    /// <summary>The extender core. Not a BepInEx plugin itself: the loader (SodExtender.Loader, GUID sod.extender)
+    /// picks this DLL (bundled or from the Workshop) and calls <see cref="Start"/>. See extender-v1.md "Core from the Workshop".</summary>
+    public static class Plugin
     {
-        public const string Version = "0.2.0";
+        public const string Version = "0.3.0";
+
+        /// <summary>The loader contract: Start(BasePlugin). Change only with a new loader; core.json "api" must match.</summary>
+        public const int ApiMajor = 1;
 
         /// <summary>Config sod.extender: the "SOD Extender" button on the Mods screen.</summary>
         internal static bool PanelEnabled { get; private set; }
@@ -18,21 +22,30 @@ namespace SodExtender
         /// <summary>Config sod.extender [Guard] DeferUnpatch, default true since 2026-11-17: see PatchGuard.Tick.</summary>
         internal static bool DeferUnpatch { get; private set; }
 
-        public override void Load()
+        /// <summary>Where this core came from, for the report ("bundled" or "workshop ..."). Set by the loader.</summary>
+        public static string Source { get; private set; } = "bundled";
+
+        private static bool _started;
+
+        /// <summary>Called once by the loader from its BasePlugin.Load. Uses the host's config file and log.</summary>
+        public static void Start(BasePlugin host, string source)
         {
-            Extender.Init(Log);
-            PanelEnabled = Config.Bind("Panel", "Enabled", true,
+            if (_started) return;
+            _started = true;
+            Source = source ?? "bundled";
+            Extender.Init(host.Log);
+            PanelEnabled = host.Config.Bind("Panel", "Enabled", true,
                 "Show the SOD Extender status button on the Mods screen.").Value;
-            DeferUnpatch = Config.Bind("Guard", "DeferUnpatch", true,
+            DeferUnpatch = host.Config.Bind("Guard", "DeferUnpatch", true,
                 "Remove the patches of a mod turned off at run time only after 5 s of calm gameplay, not at once. " +
                 "An immediate unpatch during a save load could freeze the game. Set false for the old behaviour.").Value;
             new Harmony("sod.extender").PatchAll(typeof(Plugin).Assembly);
             ClassInjector.RegisterTypeInIl2Cpp<ExtenderBehaviour>();
-            var host = new GameObject("SodExtender");
-            UnityEngine.Object.DontDestroyOnLoad(host);
-            host.hideFlags = HideFlags.HideAndDontSave;
-            host.AddComponent<ExtenderBehaviour>();
-            Log.LogInfo("SOD Extender " + Version + " ready");
+            var go = new GameObject("SodExtender");
+            UnityEngine.Object.DontDestroyOnLoad(go);
+            go.hideFlags = HideFlags.HideAndDontSave;
+            go.AddComponent<ExtenderBehaviour>();
+            host.Log.LogInfo($"SOD Extender {Version} ready (core: {Source})");
         }
     }
 

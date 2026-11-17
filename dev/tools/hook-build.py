@@ -28,6 +28,8 @@ def main() -> int:
         args = ["build", "SodDevBridge"]
     elif parts[:2] == ("extender", "SodExtender"):
         args = ["build", "SodExtender"]
+    elif parts[:2] == ("extender", "SodExtender.Loader"):
+        args = ["build", "SodExtender.Loader"]
     elif parts[:2] == ("dev", "tests") or (parts[0] == "mods" and "tests" in parts):
         args = ["test", "--compile-only"]
     elif parts[0] == "mods" and len(parts) > 2:

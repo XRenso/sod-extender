@@ -184,6 +184,7 @@ namespace SodExtender
             try
             {
                 var text = new StringBuilder();
+                text.AppendLine("Extender\t" + Plugin.Version + "\tcore: " + Plugin.Source);
                 foreach (var m in _mods)
                     text.AppendLine($"{m.State}\t{m.Name}\t{m.Error}");
                 foreach (var c in _conflicts)

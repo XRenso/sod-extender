@@ -5,7 +5,19 @@ import sys
 import time
 from pathlib import Path
 
+# Usage: ws_game_upload.py <work dir with ws_game_upload.tmpl + preview.png> <game root> [package folder] [title] [description file]
+# Defaults: the old ExampleMod test item. Every upload is forced Private (see the template).
 sp, root = Path(sys.argv[1]), Path(sys.argv[2])
+folder = Path(sys.argv[3]) if len(sys.argv) > 3 else root / "dev" / "build" / "packages" / "ExampleMod"
+title = sys.argv[4] if len(sys.argv) > 4 else "SOD Extender test (private)"
+desc = Path(sys.argv[5]).read_text(encoding="utf-8") if len(sys.argv) > 5 else "Private test item for the SOD Extender. Not for public use."
+
+
+def cs(text):
+    """Escape for a C# verbatim string."""
+    return text.replace('"', '""')
+
+
 SOD = ["py", str(root / "dev" / "tools" / "sod.py")]
 
 
@@ -15,8 +27,9 @@ def sod(*args):
 
 
 code = (sp / "ws_game_upload.tmpl").read_text(encoding="utf-8") \
-    .replace("@FOLDER@", str(root / "dev" / "build" / "packages" / "ExampleMod").replace("/", "\\")) \
-    .replace("@PREVIEW@", str(sp / "preview.png"))
+    .replace("@FOLDER@", str(folder).replace("/", "\\")) \
+    .replace("@PREVIEW@", str(sp / "preview.png")) \
+    .replace("@TITLE@", cs(title)).replace("@DESC@", cs(desc))
 path = sp / "ws_game_upload_now.cs"
 path.write_text(code, encoding="utf-8")
 rc, out = sod("exec", "-f", str(path))
