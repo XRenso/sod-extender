@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Offline, deterministic tests: no game launch, no NuGet packages. Run: py dev/tools/sod.py unit -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- The SDK's own runtime (8.0). Pure sources are plain C#, so the net6 target of the mods does not matter. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <UseAppHost>false</UseAppHost>
+    <RootNamespace>SodOffline</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Runner, asserts, fakes, shared tests. -->
+    <Compile Include="*.cs;Fakes\**\*.cs" />
+    <!-- Pure code under test, linked as source: the extender's Pure folder and each mod's src/Rules. -->
+    <Compile Include="$(GameDir)extender\SodExtender\Pure\**\*.cs" Link="pure\extender\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(GameDir)mods\*\src\Rules\**\*.cs" Link="pure\mods\%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- Mod offline tests. mods/*/tests/*.cs (one level) stays the in-game suite. -->
+    <Compile Include="$(GameDir)mods\*\tests\offline\**\*.cs" Link="modtests\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

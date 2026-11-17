@@ -1,0 +1,34 @@
+SOD Extender - third-party components
+=====================================
+
+SOD Extender (BepInEx/plugins/SodExtender/SodExtender.dll) is MIT licensed, see LICENSE.
+
+This archive also contains, UNMODIFIED, the BepInEx 6.0.0-be.788 IL2CPP distribution and the
+.NET 6 runtime it uses. These components keep their own licences:
+
+  BepInEx (BepInEx/core/BepInEx.*.dll)      LGPL-2.1   https://github.com/BepInEx/BepInEx
+  Il2CppInterop (Il2CppInterop.*.dll)       LGPL-3.0   https://github.com/BepInEx/Il2CppInterop
+  UnityDoorstop (winhttp.dll, .ini)         LGPL-2.1   https://github.com/NeighTools/UnityDoorstop
+  HarmonyX (0Harmony.dll)                   MIT        https://github.com/BepInEx/HarmonyX
+  MonoMod (MonoMod.*.dll)                   MIT        https://github.com/MonoMod/MonoMod
+  Mono.Cecil (Mono.Cecil*.dll)              MIT        https://github.com/jbevain/cecil
+  Cpp2IL / LibCpp2IL                        MIT        https://github.com/SamboyCoding/Cpp2IL
+  AsmResolver (AsmResolver*.dll)            MIT        https://github.com/Washi1337/AsmResolver
+  Iced (Iced.dll)                           MIT        https://github.com/icedland/iced
+  Dobby (dobby.dll)                         Apache-2.0 https://github.com/jmpews/Dobby
+  .NET runtime (dotnet/)                    MIT        https://github.com/dotnet/runtime
+  AssetRipper.Primitives, AssetRipper.CIL  MIT        https://github.com/AssetRipper
+  Disarm (Disarm.dll)                      MIT        https://github.com/SamboyCoding/Disarm
+  Capstone.NET (Gee.External.Capstone.dll) MIT        https://github.com/9ee1/Capstone.NET
+  SemanticVersioning.dll                   MIT        https://github.com/adamreeve/semver.net
+  StableNameDotNet, WasmDisassembler       MIT        part of https://github.com/SamboyCoding/Cpp2IL
+
+The full licence texts are in the "licenses" folder next to this file. Il2CppInterop is
+LGPL-3.0, which builds on the GNU GPL v3: its text is in licenses/GPL-3.0.txt.
+The dotnet/ folder is the official .NET 6 runtime as Microsoft distributes it.
+
+Source code of the LGPL components is available at the URLs above. You may replace any LGPL
+component with your own modified build: the extender loads them by file name only.
+
+Unity engine libraries are NOT included. On the first start BepInEx downloads them from
+https://unity.bepinex.dev (its default setting) to generate the game wrappers.

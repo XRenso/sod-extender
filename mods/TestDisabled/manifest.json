@@ -1,0 +1,7 @@
+{
+  "name": "TestDisabled",
+  "version_number": "0.1.0",
+  "author": "SodExtender",
+  "description": "",
+  "enabled": false
+}

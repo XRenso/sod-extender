@@ -1,0 +1,9 @@
+// Uses the game's real uploader class. The Private guard goes first; a failure here stops before any upload.
+ForcePrivateWorkshopUploads();
+var go = new GameObject("DevWorkshopUploader");
+UnityEngine.Object.DontDestroyOnLoad(go);
+var c = go.AddComponent<SteamWorkshopController>();
+if (c == null) throw new Exception("no SteamWorkshopController");
+c.UploadContent("SOD Extender test (private)", "Private test item for the SOD Extender. Not for public use.",
+    @"@FOLDER@", new string[0], @"@PREVIEW@");
+return "upload started; instance=" + (SteamWorkshopController.Instance != null);

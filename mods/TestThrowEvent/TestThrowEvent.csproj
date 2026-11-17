@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>TestThrowEvent</AssemblyName>
+    <RootNamespace>TestThrowEvent</RootNamespace>
+    <OutputType>Library</OutputType>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src\**\*.cs" />
+    <!-- Build the extender first: sod.py build SodExtender -->
+    <Reference Include="$(GameDir)dev\build\SodExtender\SodExtender.dll" Private="false" />
+  </ItemGroup>
+</Project>

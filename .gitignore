@@ -1,0 +1,19 @@
+# Whitelist: this repo lives in the Steam game folder and tracks ONLY our files.
+/*
+!/.gitignore
+!/CLAUDE.md
+!/Directory.Build.props
+!/LICENSE
+!/README.md
+!/.claude/
+/.claude/settings.local.json
+!/dev/
+/dev/bridge/
+/dev/build/
+/dev/toolchain/
+/dev/reference/
+/dev/backup-vanilla/
+!/mods/
+!/extender/
+bin/
+obj/

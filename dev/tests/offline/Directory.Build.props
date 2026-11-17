@@ -1,0 +1,10 @@
+<Project>
+  <!-- Stops the root Directory.Build.props: this project must NOT see BepInEx, Il2CppInterop or the
+       game's interop wrappers. A game type in a pure file then fails the build here. -->
+  <PropertyGroup>
+    <GameDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\..\'))</GameDir>
+    <OutputPath>$(GameDir)dev\build\$(MSBuildProjectName)\</OutputPath>
+    <BaseIntermediateOutputPath>$(GameDir)dev\build\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,35 @@
+<Project>
+  <!-- Shared by every C# project under the game folder (mods/*, dev/SodDevBridge).
+       Compiles against the runtime BepInEx ships, so a build needs no NuGet download. -->
+  <PropertyGroup>
+    <GameDir>$(MSBuildThisFileDirectory)</GameDir>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <UseAppHost>false</UseAppHost>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <NoCompilerStandardLib>true</NoCompilerStandardLib>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <NoWarn>$(NoWarn);NETSDK1138;CS1701;CS1702;MSB3277</NoWarn>
+    <OutputPath>$(GameDir)dev\build\$(MSBuildProjectName)\</OutputPath>
+    <BaseIntermediateOutputPath>$(GameDir)dev\build\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- .NET runtime used by BepInEx. Native DLLs are excluded by pattern. -->
+    <Reference Include="$(GameDir)dotnet\System*.dll;$(GameDir)dotnet\netstandard.dll;$(GameDir)dotnet\mscorlib.dll;$(GameDir)dotnet\Microsoft.CSharp.dll"
+               Exclude="$(GameDir)dotnet\System*.Native*.dll"
+               Private="false" />
+    <!-- BepInEx core. -->
+    <Reference Include="$(GameDir)BepInEx\core\BepInEx.Core.dll;$(GameDir)BepInEx\core\BepInEx.Unity.IL2CPP.dll;$(GameDir)BepInEx\core\BepInEx.Unity.Common.dll;$(GameDir)BepInEx\core\Il2CppInterop.Runtime.dll;$(GameDir)BepInEx\core\Il2CppInterop.Common.dll;$(GameDir)BepInEx\core\0Harmony.dll"
+               Private="false" />
+    <!-- Generated game + Unity wrappers (exist after the first launch). -->
+    <Reference Include="$(GameDir)BepInEx\interop\*.dll" Private="false" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py dev/tools/sod.py:*)",
+      "PowerShell(py dev/tools/sod.py:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Read(//c/Users/sxr/AppData/LocalLow/ColePowered Games/Shadows of Doubt/**)"
+    ],
+    "deny": [
+      "Edit(Shadows of Doubt_Data/**)",
+      "Write(Shadows of Doubt_Data/**)",
+      "Edit(BepInEx/core/**)",
+      "Write(BepInEx/core/**)",
+      "Edit(BepInEx/interop/**)",
+      "Write(BepInEx/interop/**)",
+      "Edit(dotnet/**)",
+      "Write(dotnet/**)",
+      "Edit(dev/backup-vanilla/**)",
+      "Write(dev/backup-vanilla/**)",
+      "Edit(//c/Users/sxr/AppData/LocalLow/ColePowered Games/Shadows of Doubt/Save/**)",
+      "Write(//c/Users/sxr/AppData/LocalLow/ColePowered Games/Shadows of Doubt/Save/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py \"$CLAUDE_PROJECT_DIR/dev/tools/hook-build.py\"",
+            "timeout": 90
+          }
+        ]
+      }
+    ]
+  }
+}
